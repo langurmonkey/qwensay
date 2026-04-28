@@ -6,11 +6,21 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "qwen-tts>=0.1.1",
-    "torch>=2.11.0",
+    "torch>=2.1.0",
+    "soundfile",
 ]
 
-[tool.uv]
-torch-backend = "cpu"
+[project.scripts]
+qwensay = "qwensay:main"
+
 
 [project.optional-dependencies]
+# This defines the "choice" for the user
 gpu = ["flash-attn"]
+
+[tool.uv]
+package = true
+no-build-isolation-package = ["flash-attn"]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch", "setuptools", "wheel"]

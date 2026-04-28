@@ -85,22 +85,33 @@ def main() -> None:
     dtype = torch.bfloat16 if "cuda" in device else torch.float32
 
     # Safety check for Flash Attention
-    use_flash = not args.no_flash_attn and "cuda" in device
+    use_flash = False
+    if not args.no_flash_attn and "cuda" in device:
+        try:
+            import flash_attn
+            use_flash = True
+        except ImportError:
+            use_flash = False
     attn_impl = "flash_attention_2" if use_flash else "eager"
 
+    # Load model
     print(f"\n🔊 Qwen3-TTS | Model: {model_key} | Device: {device}")
-    
+    print("📥 Loading model...")
     try:
         model = Qwen3TTSModel.from_pretrained(
             model_id, 
             device_map=device, 
-            torch_dtype=dtype, 
+            dtype=dtype, 
             attn_implementation=attn_impl
         )
     except Exception as e:
-        if "flash_attention" in str(e):
+        if "flash_attention" in str(e).lower():
             print("⚠️ Flash Attention failed to load. Falling back to 'eager' implementation...")
-            model = Qwen3TTSModel.from_pretrained(model_id, device_map=device, torch_dtype=dtype, attn_implementation="eager")
+            model = Qwen3TTSModel.from_pretrained(
+                                        model_id,
+                                        device_map=device,
+                                        dtype=dtype,
+                                        attn_implementation="eager")
         else:
             raise e
 
