@@ -3,24 +3,33 @@ name = "qwensay"
 version = "0.1.0"
 description = "Command line tool for text-to-speech synthesis using Qwen3-TTS"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
+
 dependencies = [
     "qwen-tts>=0.1.1",
-    "torch>=2.1.0",
     "soundfile",
 ]
 
-[project.scripts]
-qwensay = "qwensay:main"
+[dependency-groups]
+torch-default = [
+    "torch>=2.7.0",
+]
+torch-pascal = [
+    "torch==2.7.1",
+    "torchvision==0.22.1",
+    "torchaudio==2.7.1",
+]
 
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+torchvision = { index = "pytorch-cu126" }
+torchaudio = { index = "pytorch-cu126" }
 
-[project.optional-dependencies]
-# This defines the "choice" for the user
-gpu = ["flash-attn"]
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
 
 [tool.uv]
 package = true
-no-build-isolation-package = ["flash-attn"]
-
-[tool.uv.extra-build-dependencies]
-flash-attn = ["torch", "setuptools", "wheel"]
+default-groups = ["torch-default"]
